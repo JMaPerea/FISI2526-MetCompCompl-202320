@@ -1,0 +1,1 @@
+while read -r id urls; do     ( mkdir -p "$id" && cd "$id" && wget $urls ); done < <(sed 's/[|;]/ /g' indices_refraccion.csv)
