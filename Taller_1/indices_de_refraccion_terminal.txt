@@ -1,1 +1,2 @@
-while read -r id urls; do     ( mkdir -p "$id" && cd "$id" && wget $urls ); done < <(sed 's/[|;]/ /g' indices_refraccion.csv)
+awk -F "," '{OFS=","} {print $1,$4}' indices_refraccion.csv > links.csv
+while IFS=, read objid nombre url1; do     echo "Creating folder $objid";     mkdir -p "$objid";      (         cd "$objid";          echo "Downloading";         wget -O "$nombre.yml" "$url1";   );  done < links.csv
