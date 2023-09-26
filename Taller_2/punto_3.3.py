@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import sympy as sym
 import math
+import subprocess
 x=sym.Symbol('x',real=True)
 
 def GetLaguerreRecursive(n,x):
@@ -114,7 +115,7 @@ def estimar_integral(ck,xk,func,n):
 
 
 #Si excluimos todas las constantes de la integral asumiendo valores para M,R,T
-Pvu=lambda u: u*np.exp(-u)
+Pvu=lambda u: 4*u*np.exp(-u)
 k=5
 ck=GetWeightsGLag(k)
 xk=GetAllRootsGLag(k)
@@ -129,7 +130,7 @@ T=np.linspace(100,1000,num=10)
 M=1.00784
 R=8.3145
 v=np.linspace(0,100,100)
-
+#
 
 for i in T:
     Pv= lambda v: 4*np.pi*(M/(2*np.pi*R*i))**(3/2)*v**2*(np.exp(-(M*v**2)/(2*R*i)))
@@ -141,15 +142,21 @@ plt.title('Maxwell-Boltzmann Hidrogeno')
 plt.legend()
 plt.grid(True)
 plt.show()
-    
+
+
+#--------------------------------------------------------------------------------------------    
 
 print('Punto 3')
+
+
 vvalue=[]
 for i in T:
-    Pv= lambda u: np.sqrt((2*R*i*u)/(M))*4*np.pi*(M/(2*np.pi*R*i))**(3/2)*((2*R*i*u)/(M))*np.exp(-u)
+    Pv= lambda u: np.sqrt((2*R*i*u)/(M))*4*np.pi*(M/(2*np.pi*R*i))*((2*R*i*u)/(M))*np.exp(-u)
+    #Pv= lambda v: v*4*np.pi*(M/(2*np.pi*R*i))**(3/2)*v**2*(np.exp(-(M*v**2)/(2*R*i)))
+    
     sol=estimar_integral(ck, xk, Pv, k)
     vvalue.append(sol)
-    print(f'El valor de la velocidad promedio en {i}K es: {sol}')
+    print(f'El valor de la velocidad promedio calculada en {i}K es: {sol}')
 
 plt.plot(T,vvalue)
 plt.title('Valores Calculados (Hidrogeno)')
@@ -161,6 +168,9 @@ plt.show()
 
 
 vavg= lambda T: np.sqrt((8*R*T)/(np.pi*M))
+for i in T:
+    d=vavg(i)
+    print(f'El valor Teorico de la velocidad promedio en {i}K es {d}')
 plt.plot(T,vavg(T))
 plt.xscale('log')
 plt.title('Valores Teorícos (Hidrogeno)')
@@ -168,7 +178,44 @@ plt.xlabel('Temp (K)')
 plt.ylabel('v avg')
 plt.grid(True)
 plt.show()   
+
+vmvalue=[]
+
+#--------------------------------------------------------------------------------------------
+
+print('Punto 4')
+
+for i in T:
+    Pv= lambda u: ((2*R*i*u)/(M))*4*np.pi*(M/(2*np.pi*R*i))*((2*R*i*u)/(M))*np.exp(-u)
     
+    
+    sol=np.sqrt(estimar_integral(ck, xk, Pv, k))
+    vmvalue.append(sol)
+    print(f'El valor de la velocidad media cuadratica calculada en {i}K es: {sol}')
+
+plt.plot(T,vmvalue)
+plt.title('Valores Calculados (Hidrogeno)')
+plt.xscale('log')
+plt.xlabel('Temp (K)')
+plt.ylabel('v rms')
+plt.grid(True)
+plt.show()
+
+vrms= lambda T: np.sqrt((3*R*T)/(M))
+for i in T:
+    d=vrms(i)
+    print(f'El valor Teorico de la velocidad media cuadratica en {i}K es {d}')
+plt.plot(T,vrms(T))
+plt.xscale('log')
+plt.title('Valores Teorícos (Hidrogeno)')
+plt.xlabel('Temp (K)')
+plt.ylabel('v avg')
+plt.grid(True)
+plt.show()   
+
+#--------------------------------------------------------------------------------------------
+
+
 
     
 
