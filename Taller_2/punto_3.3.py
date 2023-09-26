@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Sep 21 17:11:25 2023
+Created on Sat Sep 23 20:53:00 2023
 
-@author: ADMIN
+@author: POWER
 """
-
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import sympy as sym
 import math
-
-x = sym.Symbol('x',real=True)
-y = sym.Symbol('y',real=True)
+x=sym.Symbol('x',real=True)
 
 def GetLaguerreRecursive(n,x):
 
@@ -73,7 +70,7 @@ def GetRoots(f,df,x,tolerancia = 10):
 
 def GetAllRootsGLag(n):
 
-    xn = np.linspace(0,n+(n-1)*np.sqrt(n),100)
+    xn = np.linspace(0,n+((n-1)*np.sqrt(n)),100)
     
     Laguerre = []
     DLaguerre = []
@@ -104,60 +101,76 @@ def GetWeightsGLag(n):
     
     return Weights
 
-def GetHermiteRecursive(n,x):
-
-    if n==0:
-        poly = 1
-    elif n==1:
-        poly = 2*x
-    else:
-        poly = 2*x*GetHermiteRecursive(n-1, x)-((2*n-2)*GetHermiteRecursive(n-2, x))
-   
-    return sym.expand(poly,x)
-
-def GetDHermite(n,x):
-    Pn = GetHermiteRecursive(n,x)
-    return sym.diff(Pn,x,1)
-
-
-def GetAllRootsGHerm(n):
-
-    xn = np.linspace(-np.sqrt(4*n+1),np.sqrt(4*n+1),100)
+def estimar_integral(ck,xk,func,n):
+    sol=0
     
-    Hermite = []
-    DHermite = []
+    for i in range(n):
+        val=ck[i]*func(xk[i])
+        sol=sol+val
+        
+    return sol
+
+
+
+
+#Si excluimos todas las constantes de la integral asumiendo valores para M,R,T
+Pvu=lambda u: u*np.exp(-u)
+k=5
+ck=GetWeightsGLag(k)
+xk=GetAllRootsGLag(k)
+
+Valor=estimar_integral(ck, xk, Pvu,k)
+print('Punto 1')
+print(f'Valor estimado de la integral: {Valor}')
+
+
+#asumiendo hirogeno monoatomico
+T=np.linspace(100,1000,num=10)
+M=1.00784
+R=8.3145
+v=np.linspace(0,100,100)
+
+
+for i in T:
+    Pv= lambda v: 4*np.pi*(M/(2*np.pi*R*i))**(3/2)*v**2*(np.exp(-(M*v**2)/(2*R*i)))
+    plt.plot(v,Pv(v))
+    plt.plot(v,Pv(v), label=f'Temp = {i} K')
+plt.xlabel('Velocidad (m/s)')
+plt.ylabel('(p(v))')
+plt.title('Maxwell-Boltzmann Hidrogeno')
+plt.legend()
+plt.grid(True)
+plt.show()
     
-    for i in range(n+1):
-        Hermite.append(GetHermiteRecursive(i,x))
-        DHermite.append(GetDHermite(i,x))
+
+print('Punto 3')
+vvalue=[]
+for i in T:
+    Pv= lambda u: np.sqrt((2*R*i*u)/(M))*4*np.pi*(M/(2*np.pi*R*i))**(3/2)*((2*R*i*u)/(M))*np.exp(-u)
+    sol=estimar_integral(ck, xk, Pv, k)
+    vvalue.append(sol)
+    print(f'El valor de la velocidad promedio en {i}K es: {sol}')
+
+plt.plot(T,vvalue)
+plt.title('Valores Calculados (Hidrogeno)')
+plt.xscale('log')
+plt.xlabel('Temp (K)')
+plt.ylabel('v avg')
+plt.grid(True)
+plt.show()
+
+
+vavg= lambda T: np.sqrt((8*R*T)/(np.pi*M))
+plt.plot(T,vavg(T))
+plt.xscale('log')
+plt.title('Valores Teorícos (Hidrogeno)')
+plt.xlabel('Temp (K)')
+plt.ylabel('v avg')
+plt.grid(True)
+plt.show()   
     
-    poly = sym.lambdify([x],Hermite[n],'numpy')
-    Dpoly = sym.lambdify([x],DHermite[n],'numpy')
-    Roots = GetRoots(poly,Dpoly,xn)
-
-    if len(Roots) != n:
-        ValueError('El número de raíces debe ser igual al n del polinomio.')
-    
-    return Roots
-
-def GetWeightsGHerm(n):
-
-    Roots = GetAllRootsGHerm(n)
 
     
 
-    poly=sym.lambdify(x,GetHermiteRecursive(n-1, x))
-    
-    Weights = (2**(2-1)*np.math.factorial(n)*np.sqrt(np.pi)) / (n**2*poly(Roots))
-    
-    return Weights
 
 
-print("raices Laguerre  ",GetAllRootsGLag(3))
-print("pesos Laguerre  ",GetWeightsGLag(3))
-print("polinomio laguerre",GetLaguerreRecursive(3, x))
-
-
-print("raices Hermite ",GetAllRootsGHerm(3))
-print("pesos Hermite  ", GetWeightsGHerm(3))
-print("polinomio Hermite",GetHermiteRecursive(3, x))
