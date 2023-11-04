@@ -73,7 +73,7 @@ def GetRoots(f,df,x,tolerancia = 10):
 
 def GetAllRootsGLag(n):
 
-    xn = np.linspace(0,n+((n-1)*np.sqrt(n)),100)
+    xn = np.linspace(0,n+(n-1)*np.sqrt(n),100)
     
     Laguerre = []
     DLaguerre = []
@@ -97,13 +97,10 @@ def GetWeightsGLag(n):
 
     
 
-    DLaguerre = []
+    poly = sym.lambdify(x,GetLaguerreRecursive(n+1, x))   
+
+    Weights = Roots / ((n+1)**2*(poly(Roots)**2))
     
-    for i in range(n+1):
-        DLaguerre.append(GetDLaguerre(i,x))
-    
-    Dpoly = sym.lambdify([x],DLaguerre[n],'numpy')
-    Weights = 2/((1-Roots**2)*Dpoly(Roots)**2)
     
     return Weights
 
@@ -149,13 +146,9 @@ def GetWeightsGHerm(n):
 
     
 
-    DHermite = []
+    poly=sym.lambdify(x,GetHermiteRecursive(n-1, x))
     
-    for i in range(n+1):
-        DHermite.append(GetDHermite(i,x))
-    
-    Dpoly = sym.lambdify([x],DHermite[n],'numpy')
-    Weights = 2/((1-Roots**2)*Dpoly(Roots)**2)
+    Weights = (2**(2-1)*np.math.factorial(n)*np.sqrt(np.pi)) / (n**2*poly(Roots))
     
     return Weights
 
